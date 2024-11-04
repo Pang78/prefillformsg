@@ -10,7 +10,9 @@
         input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; }
         button { margin-top: 15px; padding: 10px 20px; cursor: pointer; }
         #output { margin-top: 20px; font-weight: bold; color: #007bff; }
-        .field-group { margin-top: 15px; }
+        table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
+        .remove-btn { color: red; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -20,15 +22,23 @@
 <label for="formUrl">Form URL:</label>
 <input type="text" id="formUrl" placeholder="Enter form URL">
 
-<div id="fieldsContainer">
-    <div class="field-group">
-        <label>Field ID:</label>
-        <input type="text" class="fieldId" placeholder="Enter Field ID">
-        
-        <label>Pre-fill Value:</label>
-        <input type="text" class="preFillValue" placeholder="Enter value to pre-fill">
-    </div>
-</div>
+<!-- Table to hold field ID and value pairs -->
+<table id="fieldsTable">
+    <thead>
+        <tr>
+            <th>Field ID</th>
+            <th>Pre-fill Value</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="field-row">
+            <td><input type="text" class="fieldId" placeholder="Enter Field ID"></td>
+            <td><input type="text" class="preFillValue" placeholder="Enter value to pre-fill"></td>
+            <td><span class="remove-btn" onclick="removeField(this)">Remove</span></td>
+        </tr>
+    </tbody>
+</table>
 
 <button onclick="addField()">Add Field</button>
 <button onclick="generateUrl()">Generate URL</button>
@@ -37,41 +47,56 @@
 
 <script>
 function addField() {
-    // Create a new field group container
-    const fieldGroup = document.createElement("div");
-    fieldGroup.className = "field-group";
-    
-    // Create Field ID input
-    const fieldIdLabel = document.createElement("label");
-    fieldIdLabel.textContent = "Field ID:";
+    // Get the table body element
+    const tableBody = document.getElementById("fieldsTable").querySelector("tbody");
+
+    // Create a new row
+    const row = document.createElement("tr");
+    row.className = "field-row";
+
+    // Create and add the Field ID cell
+    const fieldIdCell = document.createElement("td");
     const fieldIdInput = document.createElement("input");
     fieldIdInput.type = "text";
     fieldIdInput.className = "fieldId";
     fieldIdInput.placeholder = "Enter Field ID";
-    
-    // Create Pre-fill Value input
-    const preFillLabel = document.createElement("label");
-    preFillLabel.textContent = "Pre-fill Value:";
+    fieldIdCell.appendChild(fieldIdInput);
+
+    // Create and add the Pre-fill Value cell
+    const preFillCell = document.createElement("td");
     const preFillInput = document.createElement("input");
     preFillInput.type = "text";
     preFillInput.className = "preFillValue";
     preFillInput.placeholder = "Enter value to pre-fill";
-    
-    // Append inputs to the field group
-    fieldGroup.appendChild(fieldIdLabel);
-    fieldGroup.appendChild(fieldIdInput);
-    fieldGroup.appendChild(preFillLabel);
-    fieldGroup.appendChild(preFillInput);
-    
-    // Append the field group to the container
-    document.getElementById("fieldsContainer").appendChild(fieldGroup);
+    preFillCell.appendChild(preFillInput);
+
+    // Create and add the Remove button cell
+    const removeCell = document.createElement("td");
+    const removeBtn = document.createElement("span");
+    removeBtn.className = "remove-btn";
+    removeBtn.textContent = "Remove";
+    removeBtn.onclick = () => removeField(removeBtn);
+    removeCell.appendChild(removeBtn);
+
+    // Append cells to the row
+    row.appendChild(fieldIdCell);
+    row.appendChild(preFillCell);
+    row.appendChild(removeCell);
+
+    // Append the row to the table body
+    tableBody.appendChild(row);
+}
+
+function removeField(element) {
+    // Remove the row that contains the clicked remove button
+    element.closest("tr").remove();
 }
 
 function generateUrl() {
     const formUrl = document.getElementById("formUrl").value;
     const fieldIds = document.querySelectorAll(".fieldId");
     const preFillValues = document.querySelectorAll(".preFillValue");
-    
+
     let queryParams = [];
 
     // Loop through each field and value, encode them, and add to query params
@@ -95,3 +120,4 @@ function generateUrl() {
 
 </body>
 </html>
+
