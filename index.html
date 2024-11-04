@@ -5,17 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pre-filled URL Generator</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        label { display: block; margin-top: 10px; }
-        input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; }
-        button { margin-top: 15px; padding: 10px 20px; cursor: pointer; }
-        #output { margin-top: 20px; font-weight: bold; color: #007bff; }
-        table { width: 100%; margin-top: 10px; border-collapse: collapse; }
-        th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-        .remove-btn { color: red; cursor: pointer; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Night View Styles */
+        body.night-view {
+            background-color: #1f1f1f;
+            color: #c7c7c7;
+        }
+
+        .night-view input[type="text"] {
+            background-color: #2d2d2d;
+            border-color: #4d4d4d;
+            color: #c7c7c7;
+        }
+
+        .night-view button {
+            background-color: #4d4d4d;
+            color: #c7c7c7;
+        }
+
+        .night-view #output {
+            color: #8ec4ff;
+        }
+
+        .night-view table {
+            border-color: #4d4d4d;
+        }
+
+        .night-view th, .night-view td {
+            border-color: #4d4d4d;
+        }
+
+        /* Generic Styles */
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 6px;
+            margin-top: 5px;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            color: #333;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .remove-btn {
+            color: #ff6b6b;
+            cursor: pointer;
+        }
+
+        #theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
+
+<button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
 
 <h1>Pre-filled URL Generator</h1>
 
@@ -33,15 +125,15 @@
     </thead>
     <tbody>
         <tr class="field-row">
-            <td><input type="text" class="fieldId" placeholder="Enter Field ID"></td>
-            <td><input type="text" class="preFillValue" placeholder="Enter value to pre-fill"></td>
+            <td><input type="text" class="fieldId" placeholder="ID" style="font-size: 14px;"></td>
+            <td><input type="text" class="preFillValue" placeholder="Value" style="font-size: 14px;"></td>
             <td><span class="remove-btn" onclick="removeField(this)">Remove</span></td>
         </tr>
     </tbody>
 </table>
 
-<button onclick="addField()">Add Field</button>
-<button onclick="generateUrl()">Generate URL</button>
+<button onclick="addField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
+<button onclick="generateUrl()" style="background-color: #ff6b6b; color: #ffffff;">Generate URL</button>
 
 <div id="output"></div>
 
@@ -59,7 +151,8 @@ function addField() {
     const fieldIdInput = document.createElement("input");
     fieldIdInput.type = "text";
     fieldIdInput.className = "fieldId";
-    fieldIdInput.placeholder = "Enter Field ID";
+    fieldIdInput.placeholder = "ID";
+    fieldIdInput.style.fontSize = "14px";
     fieldIdCell.appendChild(fieldIdInput);
 
     // Create and add the Pre-fill Value cell
@@ -67,7 +160,8 @@ function addField() {
     const preFillInput = document.createElement("input");
     preFillInput.type = "text";
     preFillInput.className = "preFillValue";
-    preFillInput.placeholder = "Enter value to pre-fill";
+    preFillInput.placeholder = "Value";
+    preFillInput.style.fontSize = "14px";
     preFillCell.appendChild(preFillInput);
 
     // Create and add the Remove button cell
@@ -114,10 +208,16 @@ function generateUrl() {
     const finalUrl = `${formUrl}?${queryParams.join("&")}`;
     
     // Display the generated URL
-    document.getElementById("output").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank">${finalUrl}</a>`;
+    document.getElementById("output").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank" style="color: #007bff;">${finalUrl}</a>`;
+}
+
+function toggleTheme() {
+    const body = document.body;
+    body.classList.toggle("night-view");
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    themeToggleBtn.textContent = body.classList.contains("night-view") ? "Light View" : "Night View";
 }
 </script>
 
 </body>
 </html>
-
