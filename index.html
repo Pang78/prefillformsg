@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-filled URL Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        label { display: block; margin-top: 10px; }
+        input[type="text"] { width: 100%; padding: 8px; margin-top: 5px; }
+        button { margin-top: 15px; padding: 10px 20px; cursor: pointer; }
+        #output { margin-top: 20px; font-weight: bold; color: #007bff; }
+        .field-group { margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<h1>Pre-filled URL Generator</h1>
+
+<label for="formUrl">Form URL:</label>
+<input type="text" id="formUrl" placeholder="Enter form URL">
+
+<div id="fieldsContainer">
+    <div class="field-group">
+        <label>Field ID:</label>
+        <input type="text" class="fieldId" placeholder="Enter Field ID">
+        
+        <label>Pre-fill Value:</label>
+        <input type="text" class="preFillValue" placeholder="Enter value to pre-fill">
+    </div>
+</div>
+
+<button onclick="addField()">Add Field</button>
+<button onclick="generateUrl()">Generate URL</button>
+
+<div id="output"></div>
+
+<script>
+function addField() {
+    // Create a new field group container
+    const fieldGroup = document.createElement("div");
+    fieldGroup.className = "field-group";
+    
+    // Create Field ID input
+    const fieldIdLabel = document.createElement("label");
+    fieldIdLabel.textContent = "Field ID:";
+    const fieldIdInput = document.createElement("input");
+    fieldIdInput.type = "text";
+    fieldIdInput.className = "fieldId";
+    fieldIdInput.placeholder = "Enter Field ID";
+    
+    // Create Pre-fill Value input
+    const preFillLabel = document.createElement("label");
+    preFillLabel.textContent = "Pre-fill Value:";
+    const preFillInput = document.createElement("input");
+    preFillInput.type = "text";
+    preFillInput.className = "preFillValue";
+    preFillInput.placeholder = "Enter value to pre-fill";
+    
+    // Append inputs to the field group
+    fieldGroup.appendChild(fieldIdLabel);
+    fieldGroup.appendChild(fieldIdInput);
+    fieldGroup.appendChild(preFillLabel);
+    fieldGroup.appendChild(preFillInput);
+    
+    // Append the field group to the container
+    document.getElementById("fieldsContainer").appendChild(fieldGroup);
+}
+
+function generateUrl() {
+    const formUrl = document.getElementById("formUrl").value;
+    const fieldIds = document.querySelectorAll(".fieldId");
+    const preFillValues = document.querySelectorAll(".preFillValue");
+    
+    let queryParams = [];
+
+    // Loop through each field and value, encode them, and add to query params
+    for (let i = 0; i < fieldIds.length; i++) {
+        const fieldId = fieldIds[i].value;
+        const preFillValue = preFillValues[i].value;
+
+        if (fieldId && preFillValue) {
+            // Encode the pre-fill value and format as FieldID=Value
+            queryParams.push(`${fieldId}=${encodeURIComponent(preFillValue)}`);
+        }
+    }
+
+    // Combine base URL with query parameters
+    const finalUrl = `${formUrl}?${queryParams.join("&")}`;
+    
+    // Display the generated URL
+    document.getElementById("output").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank">${finalUrl}</a>`;
+}
+</script>
+
+</body>
+</html>
