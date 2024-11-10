@@ -1,126 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Previous head section remains the same until style -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pre-filled URL Generator</title>
     <style>
-        /* General Styles and Night Mode */
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        /* Dark Mode */
-        body.night-view {
-            background-color: #1f1f1f;
-            color: #c7c7c7;
-        }
-
-        .night-view input[type="text"] {
-            background-color: #2d2d2d;
-            border-color: #4d4d4d;
-            color: #c7c7c7;
-        }
-
-        .night-view button {
-            background-color: #4d4d4d;
-            color: #c7c7c7;
-        }
-
-        .mode-toggle, .instructions {
-            margin-bottom: 20px;
-        }
-
-        .mode-toggle button {
-            padding: 10px 20px;
-            margin-right: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            border: none;
-            border-radius: 4px;
-            color: #ffffff;
-        }
-
-        .construct-mode {
-            background-color: #007bff;
-        }
-
-        .deconstruct-mode {
-            background-color: #28a745;
-        }
-
-        .mode-content {
-            display: none;
-        }
-
-        .mode-content.active {
-            display: block;
-        }
-
-        /* Input, Button, and Table Styling */
-        label, table {
-            margin-top: 15px;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 6px;
-            margin-top: 5px;
-            background-color: #f3f3f3;
-            border: 1px solid #ccc;
-            color: #333;
-            font-size: 14px;
-        }
-
-        button {
-            margin-top: 15px;
-            padding: 8px 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        table {
-            width: 100%;
-            margin-top: 10px;
-            border-collapse: collapse;
-            border: 1px solid #ccc;
-        }
-
-        th, td {
-            padding: 8px;
-            border: 1px solid #ccc;
-            text-align: center;
-        }
-
-        .remove-btn {
-            color: #ff6b6b;
-            cursor: pointer;
-        }
-
-        .output {
-            margin-top: 20px;
-            font-weight: bold;
-            color: #007bff;
-        }
-
-        #theme-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-        }
+        /* [Previous styles remain the same] */
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
@@ -242,6 +128,13 @@
             border-radius: 4px;
             font-size: 14px;
         }
+
+        /* Add this for the paste instruction */
+        .paste-instruction {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -287,10 +180,11 @@
 <!-- Deconstruct Mode Content -->
 <div id="deconstructMode" class="mode-content">
     <h2>Deconstruct Mode</h2>
-    <p>Paste a pre-filled link to extract fields and values for editing.</p>
+    <p>Paste a pre-filled link to automatically extract fields and values for editing.</p>
     
     <label for="deconstructFormUrl">Pre-filled URL:</label>
-    <input type="text" id="deconstructFormUrl" placeholder="Enter pre-filled URL here">
+    <input type="text" id="deconstructFormUrl" placeholder="Paste your pre-filled URL here">
+    <div class="paste-instruction">URL will be automatically deconstructed when pasted</div>
 
     <table id="deconstructFieldsTable">
         <thead>
@@ -307,7 +201,6 @@
 
     <div class="button-group">
         <button onclick="addDeconstructField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
-        <button onclick="deconstructUrl()">Deconstruct URL</button>
         <button onclick="reconstructUrl()">Reconstruct URL</button>
     </div>
 
@@ -394,7 +287,7 @@ function deconstructUrl() {
     const [baseUrl, query] = url.split(/\?(.+)/);
 
     if (!query) {
-        alert("No pre-filled data found in the URL.");
+        document.getElementById("deconstructTableBody").innerHTML = "";
         return;
     }
 
@@ -459,13 +352,23 @@ function toggleTheme() {
     document.body.classList.toggle("night-view");
 }
 
-// Initialize with construct mode
-switchMode('construct');
+// Add event listeners after DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize with construct mode
+    switchMode('construct');
+    
+    // Add input event listener for auto-deconstruct
+    const deconstructInput = document.getElementById('deconstructFormUrl');
+    deconstructInput.addEventListener('input', function(e) {
+        // Use setTimeout to ensure we get the full paste
+        setTimeout(() => {
+            deconstructUrl();
+        }, 0);
+    });
+});
 </script>
 
 </body>
 </html>
-
-
 
 
