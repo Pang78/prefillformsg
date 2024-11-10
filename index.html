@@ -121,6 +121,127 @@
             border-radius: 4px;
             font-size: 14px;
         }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Dark Mode */
+        body.night-view {
+            background-color: #1f1f1f;
+            color: #c7c7c7;
+        }
+
+        .night-view input[type="text"] {
+            background-color: #2d2d2d;
+            border-color: #4d4d4d;
+            color: #c7c7c7;
+        }
+
+        .night-view button {
+            background-color: #4d4d4d;
+            color: #c7c7c7;
+        }
+
+        .mode-toggle, .instructions {
+            margin-bottom: 20px;
+        }
+
+        .mode-toggle button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
+        }
+
+        .construct-mode {
+            background-color: #007bff;
+        }
+
+        .deconstruct-mode {
+            background-color: #28a745;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        /* Input, Button, and Table Styling */
+        label, table {
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 6px;
+            margin-top: 5px;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            color: #333;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .remove-btn {
+            color: #ff6b6b;
+            cursor: pointer;
+        }
+
+        .output {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        #theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -155,8 +276,10 @@
         </tbody>
     </table>
 
-    <button onclick="addConstructField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
-    <button onclick="generateUrl()">Generate URL</button>
+    <div class="button-group">
+        <button onclick="addConstructField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
+        <button onclick="generateUrl()">Generate URL</button>
+    </div>
 
     <div id="constructOutput" class="output"></div>
 </div>
@@ -182,8 +305,11 @@
         </tbody>
     </table>
 
-    <button onclick="deconstructUrl()">Deconstruct URL</button>
-    <button onclick="reconstructUrl()">Reconstruct URL</button>
+    <div class="button-group">
+        <button onclick="addDeconstructField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
+        <button onclick="deconstructUrl()">Deconstruct URL</button>
+        <button onclick="reconstructUrl()">Reconstruct URL</button>
+    </div>
 
     <div id="deconstructOutput" class="output"></div>
 </div>
@@ -202,6 +328,10 @@ function switchMode(mode) {
 
 function addConstructField() {
     addFieldToTable('constructTableBody');
+}
+
+function addDeconstructField() {
+    addFieldToTable('deconstructTableBody');
 }
 
 function addFieldToTable(tableId) {
