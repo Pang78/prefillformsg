@@ -10,42 +10,31 @@
             padding: 20px;
             transition: background-color 0.3s, color 0.3s;
         }
-
         /* Night View Styles */
         body.night-view {
             background-color: #1f1f1f;
             color: #c7c7c7;
         }
-
         .night-view input[type="text"] {
             background-color: #2d2d2d;
             border-color: #4d4d4d;
             color: #c7c7c7;
         }
-
         .night-view button {
             background-color: #4d4d4d;
             color: #c7c7c7;
         }
-
         .night-view #output {
             color: #8ec4ff;
         }
-
         .night-view table {
             border-color: #4d4d4d;
         }
-
-        .night-view th, .night-view td {
-            border-color: #4d4d4d;
-        }
-
         /* Generic Styles */
-        label {
+        label, .instruction {
             display: block;
             margin-top: 10px;
         }
-
         input[type="text"] {
             width: 100%;
             padding: 6px;
@@ -55,7 +44,6 @@
             color: #333;
             font-size: 14px;
         }
-
         button {
             margin-top: 15px;
             padding: 8px 16px;
@@ -66,35 +54,29 @@
             border-radius: 4px;
             font-size: 14px;
         }
-
         #output {
             margin-top: 20px;
             font-weight: bold;
             color: #007bff;
         }
-
         table {
             width: 100%;
             margin-top: 10px;
             border-collapse: collapse;
             border: 1px solid #ccc;
         }
-
         th, td {
             padding: 8px;
             border: 1px solid #ccc;
             text-align: center;
         }
-
         .remove-btn {
             color: #ff6b6b;
             cursor: pointer;
         }
-
-        #theme-toggle {
+        #theme-toggle, #info-toggle {
             position: absolute;
             top: 20px;
-            right: 20px;
             padding: 8px 16px;
             cursor: pointer;
             background-color: #007bff;
@@ -103,13 +85,29 @@
             border-radius: 4px;
             font-size: 14px;
         }
+        #theme-toggle {
+            right: 120px;
+        }
+        #info-toggle {
+            right: 20px;
+        }
     </style>
 </head>
 <body>
 
 <button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+<button id="info-toggle" onclick="showInstructions()">Help</button>
 
 <h1>Pre-filled URL Generator</h1>
+
+<div id="instructions" class="instruction" style="display: none;">
+    <h3>How to Use</h3>
+    <ol>
+        <li><strong>Generate Pre-filled Link:</strong> Enter the form URL and fill in the Field IDs and their values. Click <strong>Generate URL</strong> to create a pre-filled link.</li>
+        <li><strong>Edit an Existing Link:</strong> Paste an existing pre-filled link into the <strong>Form URL</strong> field, and click <strong>Deconstruct URL</strong>. This will break down the link and allow you to update individual values easily.</li>
+        <li><strong>Toggle Theme:</strong> Use the <strong>Toggle Theme</strong> button in the top-right corner to switch between light and night view for comfort.</li>
+    </ol>
+</div>
 
 <label for="formUrl">Form URL:</label>
 <input type="text" id="formUrl" placeholder="Enter form URL">
@@ -134,37 +132,30 @@
 
 <button onclick="addField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
 <button onclick="generateUrl()" style="background-color: #ff6b6b; color: #ffffff;">Generate URL</button>
+<button onclick="deconstructUrl()" style="background-color: #4caf50; color: #ffffff;">Deconstruct URL</button>
 
 <div id="output"></div>
 
 <script>
 function addField() {
-    // Get the table body element
     const tableBody = document.getElementById("fieldsTable").querySelector("tbody");
-
-    // Create a new row
     const row = document.createElement("tr");
     row.className = "field-row";
 
-    // Create and add the Field ID cell
     const fieldIdCell = document.createElement("td");
     const fieldIdInput = document.createElement("input");
     fieldIdInput.type = "text";
     fieldIdInput.className = "fieldId";
     fieldIdInput.placeholder = "ID";
-    fieldIdInput.style.fontSize = "14px";
     fieldIdCell.appendChild(fieldIdInput);
 
-    // Create and add the Pre-fill Value cell
     const preFillCell = document.createElement("td");
     const preFillInput = document.createElement("input");
     preFillInput.type = "text";
     preFillInput.className = "preFillValue";
     preFillInput.placeholder = "Value";
-    preFillInput.style.fontSize = "14px";
     preFillCell.appendChild(preFillInput);
 
-    // Create and add the Remove button cell
     const removeCell = document.createElement("td");
     const removeBtn = document.createElement("span");
     removeBtn.className = "remove-btn";
@@ -172,17 +163,13 @@ function addField() {
     removeBtn.onclick = () => removeField(removeBtn);
     removeCell.appendChild(removeBtn);
 
-    // Append cells to the row
     row.appendChild(fieldIdCell);
     row.appendChild(preFillCell);
     row.appendChild(removeCell);
-
-    // Append the row to the table body
     tableBody.appendChild(row);
 }
 
 function removeField(element) {
-    // Remove the row that contains the clicked remove button
     element.closest("tr").remove();
 }
 
@@ -192,32 +179,72 @@ function generateUrl() {
     const preFillValues = document.querySelectorAll(".preFillValue");
 
     let queryParams = [];
-
-    // Loop through each field and value, encode them, and add to query params
     for (let i = 0; i < fieldIds.length; i++) {
         const fieldId = fieldIds[i].value;
         const preFillValue = preFillValues[i].value;
-
         if (fieldId && preFillValue) {
-            // Encode the pre-fill value and format as FieldID=Value
             queryParams.push(`${fieldId}=${encodeURIComponent(preFillValue)}`);
         }
     }
 
-    // Combine base URL with query parameters
     const finalUrl = `${formUrl}?${queryParams.join("&")}`;
-    
-    // Display the generated URL
     document.getElementById("output").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank" style="color: #007bff;">${finalUrl}</a>`;
+}
+
+function deconstructUrl() {
+    const formUrl = document.getElementById("formUrl").value;
+    const url = new URL(formUrl);
+    const params = new URLSearchParams(url.search);
+
+    const tableBody = document.getElementById("fieldsTable").querySelector("tbody");
+    tableBody.innerHTML = "";
+
+    for (const [fieldId, value] of params.entries()) {
+        const row = document.createElement("tr");
+        row.className = "field-row";
+
+        const fieldIdCell = document.createElement("td");
+        const fieldIdInput = document.createElement("input");
+        fieldIdInput.type = "text";
+        fieldIdInput.className = "fieldId";
+        fieldIdInput.value = fieldId;
+        fieldIdCell.appendChild(fieldIdInput);
+
+        const preFillCell = document.createElement("td");
+        const preFillInput = document.createElement("input");
+        preFillInput.type = "text";
+        preFillInput.className = "preFillValue";
+        preFillInput.value = decodeURIComponent(value);
+        preFillCell.appendChild(preFillInput);
+
+        const removeCell = document.createElement("td");
+        const removeBtn = document.createElement("span");
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.onclick = () => removeField(removeBtn);
+        removeCell.appendChild(removeBtn);
+
+        row.appendChild(fieldIdCell);
+        row.appendChild(preFillCell);
+        row.appendChild(removeCell);
+        tableBody.appendChild(row);
+    }
 }
 
 function toggleTheme() {
     const body = document.body;
     body.classList.toggle("night-view");
     const themeToggleBtn = document.getElementById("theme-toggle");
-    themeToggleBtn.textContent = body.classList.contains("night-view") ? "Light View" : "Night View";
+        themeToggleBtn.textContent = body.classList.contains("night-view") ? "Switch to Light Theme" : "Switch to Dark Theme";
+}
+
+function showInstructions() {
+    const instructions = document.getElementById("instructions");
+    instructions.style.display = instructions.style.display === "none" ? "block" : "none";
 }
 </script>
 
 </body>
 </html>
+
+
