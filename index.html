@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pre-filled URL Generator</title>
     <style>
+        /* General Styles and Night Mode */
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* Night View Styles */
+        /* Dark Mode */
         body.night-view {
             background-color: #1f1f1f;
             color: #c7c7c7;
@@ -28,7 +29,7 @@
             color: #c7c7c7;
         }
 
-        .mode-toggle {
+        .mode-toggle, .instructions {
             margin-bottom: 20px;
         }
 
@@ -50,10 +51,9 @@
             background-color: #28a745;
         }
 
-        /* Generic Styles */
-        label {
-            display: block;
-            margin-top: 10px;
+        /* Input, Button, and Table Styling */
+        label, table {
+            margin-top: 15px;
         }
 
         input[type="text"] {
@@ -77,12 +77,6 @@
             font-size: 14px;
         }
 
-        #output {
-            margin-top: 20px;
-            font-weight: bold;
-            color: #007bff;
-        }
-
         table {
             width: 100%;
             margin-top: 10px;
@@ -99,6 +93,12 @@
         .remove-btn {
             color: #ff6b6b;
             cursor: pointer;
+        }
+
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #007bff;
         }
 
         #theme-toggle {
@@ -131,7 +131,6 @@
 <label for="formUrl">Form URL:</label>
 <input type="text" id="formUrl" placeholder="Enter form URL here">
 
-<!-- Table to hold field ID and value pairs -->
 <table id="fieldsTable">
     <thead>
         <tr>
@@ -252,6 +251,7 @@ function deconstructUrl() {
         fieldIdInput.type = "text";
         fieldIdInput.className = "fieldId";
         fieldIdInput.value = key;
+        fieldIdInput.disabled = true;
         fieldIdCell.appendChild(fieldIdInput);
 
         const preFillCell = document.createElement("td");
@@ -274,16 +274,19 @@ function deconstructUrl() {
 
         document.getElementById("tableBody").appendChild(row);
     }
+
+    document.getElementById("actionButton").textContent = "Reconstruct URL";
+    document.getElementById("actionButton").onclick = generateUrl;
 }
 
 function toggleTheme() {
     document.body.classList.toggle("night-view");
-    document.getElementById("theme-toggle").textContent = document.body.classList.contains("night-view") ? "Light View" : "Night View";
 }
 </script>
 
 </body>
 </html>
+
 
 
 
