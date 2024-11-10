@@ -10,31 +10,52 @@
             padding: 20px;
             transition: background-color 0.3s, color 0.3s;
         }
+
         /* Night View Styles */
         body.night-view {
             background-color: #1f1f1f;
             color: #c7c7c7;
         }
+
         .night-view input[type="text"] {
             background-color: #2d2d2d;
             border-color: #4d4d4d;
             color: #c7c7c7;
         }
+
         .night-view button {
             background-color: #4d4d4d;
             color: #c7c7c7;
         }
-        .night-view #output {
-            color: #8ec4ff;
+
+        .mode-toggle {
+            margin-bottom: 20px;
         }
-        .night-view table {
-            border-color: #4d4d4d;
+
+        .mode-toggle button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
         }
+
+        .construct-mode {
+            background-color: #007bff;
+        }
+
+        .deconstruct-mode {
+            background-color: #28a745;
+        }
+
         /* Generic Styles */
-        label, .instruction {
+        label {
             display: block;
             margin-top: 10px;
         }
+
         input[type="text"] {
             width: 100%;
             padding: 6px;
@@ -44,6 +65,7 @@
             color: #333;
             font-size: 14px;
         }
+
         button {
             margin-top: 15px;
             padding: 8px 16px;
@@ -54,29 +76,35 @@
             border-radius: 4px;
             font-size: 14px;
         }
+
         #output {
             margin-top: 20px;
             font-weight: bold;
             color: #007bff;
         }
+
         table {
             width: 100%;
             margin-top: 10px;
             border-collapse: collapse;
             border: 1px solid #ccc;
         }
+
         th, td {
             padding: 8px;
             border: 1px solid #ccc;
             text-align: center;
         }
+
         .remove-btn {
             color: #ff6b6b;
             cursor: pointer;
         }
-        #theme-toggle, #info-toggle {
+
+        #theme-toggle {
             position: absolute;
             top: 20px;
+            right: 20px;
             padding: 8px 16px;
             cursor: pointer;
             background-color: #007bff;
@@ -85,32 +113,23 @@
             border-radius: 4px;
             font-size: 14px;
         }
-        #theme-toggle {
-            right: 120px;
-        }
-        #info-toggle {
-            right: 20px;
-        }
     </style>
 </head>
 <body>
 
 <button id="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
-<button id="info-toggle" onclick="showInstructions()">Help</button>
 
 <h1>Pre-filled URL Generator</h1>
 
-<div id="instructions" class="instruction" style="display: none;">
-    <h3>How to Use</h3>
-    <ol>
-        <li><strong>Generate Pre-filled Link:</strong> Enter the form URL and fill in the Field IDs and their values. Click <strong>Generate URL</strong> to create a pre-filled link.</li>
-        <li><strong>Edit an Existing Link:</strong> Paste an existing pre-filled link into the <strong>Form URL</strong> field, and click <strong>Deconstruct URL</strong>. This will break down the link and allow you to update individual values easily.</li>
-        <li><strong>Toggle Theme:</strong> Use the <strong>Toggle Theme</strong> button in the top-right corner to switch between light and night view for comfort.</li>
-    </ol>
+<div class="mode-toggle">
+    <button id="constructModeBtn" class="construct-mode" onclick="switchMode('construct')">Construct Mode</button>
+    <button id="deconstructModeBtn" class="deconstruct-mode" onclick="switchMode('deconstruct')">Deconstruct Mode</button>
 </div>
 
+<div id="instructionText"></div>
+
 <label for="formUrl">Form URL:</label>
-<input type="text" id="formUrl" placeholder="Enter form URL">
+<input type="text" id="formUrl" placeholder="Enter form URL here">
 
 <!-- Table to hold field ID and value pairs -->
 <table id="fieldsTable">
@@ -121,24 +140,32 @@
             <th>Action</th>
         </tr>
     </thead>
-    <tbody>
-        <tr class="field-row">
-            <td><input type="text" class="fieldId" placeholder="ID" style="font-size: 14px;"></td>
-            <td><input type="text" class="preFillValue" placeholder="Value" style="font-size: 14px;"></td>
-            <td><span class="remove-btn" onclick="removeField(this)">Remove</span></td>
-        </tr>
+    <tbody id="tableBody">
+        <!-- Rows will be dynamically added here -->
     </tbody>
 </table>
 
 <button onclick="addField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
-<button onclick="generateUrl()" style="background-color: #ff6b6b; color: #ffffff;">Generate URL</button>
-<button onclick="deconstructUrl()" style="background-color: #4caf50; color: #ffffff;">Deconstruct URL</button>
+<button id="actionButton" onclick="processAction()">Generate URL</button>
 
 <div id="output"></div>
 
 <script>
+let currentMode = 'construct';
+
+function switchMode(mode) {
+    currentMode = mode;
+    document.getElementById("instructionText").innerHTML = mode === 'construct'
+        ? "Construct Mode: Enter form URL and field values to create a pre-filled link."
+        : "Deconstruct Mode: Paste a pre-filled link to extract fields and values for editing.";
+
+    clearFields();
+    document.getElementById("actionButton").textContent = mode === 'construct' ? "Generate URL" : "Deconstruct URL";
+}
+
 function addField() {
-    const tableBody = document.getElementById("fieldsTable").querySelector("tbody");
+    const tableBody = document.getElementById("tableBody");
+
     const row = document.createElement("tr");
     row.className = "field-row";
 
@@ -160,17 +187,28 @@ function addField() {
     const removeBtn = document.createElement("span");
     removeBtn.className = "remove-btn";
     removeBtn.textContent = "Remove";
-    removeBtn.onclick = () => removeField(removeBtn);
+    removeBtn.onclick = () => row.remove();
     removeCell.appendChild(removeBtn);
 
     row.appendChild(fieldIdCell);
     row.appendChild(preFillCell);
     row.appendChild(removeCell);
+
     tableBody.appendChild(row);
 }
 
-function removeField(element) {
-    element.closest("tr").remove();
+function clearFields() {
+    document.getElementById("formUrl").value = "";
+    document.getElementById("tableBody").innerHTML = "";
+    document.getElementById("output").innerHTML = "";
+}
+
+function processAction() {
+    if (currentMode === 'construct') {
+        generateUrl();
+    } else {
+        deconstructUrl();
+    }
 }
 
 function generateUrl() {
@@ -179,35 +217,41 @@ function generateUrl() {
     const preFillValues = document.querySelectorAll(".preFillValue");
 
     let queryParams = [];
+
     for (let i = 0; i < fieldIds.length; i++) {
         const fieldId = fieldIds[i].value;
         const preFillValue = preFillValues[i].value;
+
         if (fieldId && preFillValue) {
             queryParams.push(`${fieldId}=${encodeURIComponent(preFillValue)}`);
         }
     }
 
     const finalUrl = `${formUrl}?${queryParams.join("&")}`;
-    document.getElementById("output").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank" style="color: #007bff;">${finalUrl}</a>`;
+    document.getElementById("output").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank">${finalUrl}</a>`;
 }
 
 function deconstructUrl() {
-    const formUrl = document.getElementById("formUrl").value;
-    const url = new URL(formUrl);
-    const params = new URLSearchParams(url.search);
+    const url = document.getElementById("formUrl").value;
+    const [baseUrl, query] = url.split("?");
 
-    const tableBody = document.getElementById("fieldsTable").querySelector("tbody");
-    tableBody.innerHTML = "";
+    if (!query) {
+        alert("No pre-filled data found in the URL.");
+        return;
+    }
 
-    for (const [fieldId, value] of params.entries()) {
+    document.getElementById("formUrl").value = baseUrl;
+    document.getElementById("tableBody").innerHTML = "";
+
+    const params = new URLSearchParams(query);
+    for (const [key, value] of params.entries()) {
         const row = document.createElement("tr");
-        row.className = "field-row";
 
         const fieldIdCell = document.createElement("td");
         const fieldIdInput = document.createElement("input");
         fieldIdInput.type = "text";
         fieldIdInput.className = "fieldId";
-        fieldIdInput.value = fieldId;
+        fieldIdInput.value = key;
         fieldIdCell.appendChild(fieldIdInput);
 
         const preFillCell = document.createElement("td");
@@ -221,30 +265,25 @@ function deconstructUrl() {
         const removeBtn = document.createElement("span");
         removeBtn.className = "remove-btn";
         removeBtn.textContent = "Remove";
-        removeBtn.onclick = () => removeField(removeBtn);
+        removeBtn.onclick = () => row.remove();
         removeCell.appendChild(removeBtn);
 
         row.appendChild(fieldIdCell);
         row.appendChild(preFillCell);
         row.appendChild(removeCell);
-        tableBody.appendChild(row);
+
+        document.getElementById("tableBody").appendChild(row);
     }
 }
 
 function toggleTheme() {
-    const body = document.body;
-    body.classList.toggle("night-view");
-    const themeToggleBtn = document.getElementById("theme-toggle");
-        themeToggleBtn.textContent = body.classList.contains("night-view") ? "Switch to Light Theme" : "Switch to Dark Theme";
-}
-
-function showInstructions() {
-    const instructions = document.getElementById("instructions");
-    instructions.style.display = instructions.style.display === "none" ? "block" : "none";
+    document.body.classList.toggle("night-view");
+    document.getElementById("theme-toggle").textContent = document.body.classList.contains("night-view") ? "Light View" : "Night View";
 }
 </script>
 
 </body>
 </html>
+
 
 
