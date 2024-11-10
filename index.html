@@ -51,6 +51,14 @@
             background-color: #28a745;
         }
 
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
         /* Input, Button, and Table Styling */
         label, table {
             margin-top: 15px;
@@ -95,7 +103,7 @@
             cursor: pointer;
         }
 
-        #output {
+        .output {
             margin-top: 20px;
             font-weight: bold;
             color: #007bff;
@@ -126,45 +134,78 @@
     <button id="deconstructModeBtn" class="deconstruct-mode" onclick="switchMode('deconstruct')">Deconstruct Mode</button>
 </div>
 
-<div id="instructionText"></div>
+<!-- Construct Mode Content -->
+<div id="constructMode" class="mode-content">
+    <h2>Construct Mode</h2>
+    <p>Enter form URL and field values to create a pre-filled link.</p>
+    
+    <label for="constructFormUrl">Form URL:</label>
+    <input type="text" id="constructFormUrl" placeholder="Enter form URL here">
 
-<label for="formUrl">Form URL:</label>
-<input type="text" id="formUrl" placeholder="Enter form URL here">
+    <table id="constructFieldsTable">
+        <thead>
+            <tr>
+                <th>Field ID</th>
+                <th>Pre-fill Value</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="constructTableBody">
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
 
-<table id="fieldsTable">
-    <thead>
-        <tr>
-            <th>Field ID</th>
-            <th>Pre-fill Value</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody id="tableBody">
-        <!-- Rows will be dynamically added here -->
-    </tbody>
-</table>
+    <button onclick="addConstructField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
+    <button onclick="generateUrl()">Generate URL</button>
 
-<button onclick="addField()" style="background-color: #ff6b6b; color: #ffffff;">Add Field</button>
-<button id="actionButton" onclick="processAction()">Generate URL</button>
+    <div id="constructOutput" class="output"></div>
+</div>
 
-<div id="output"></div>
+<!-- Deconstruct Mode Content -->
+<div id="deconstructMode" class="mode-content">
+    <h2>Deconstruct Mode</h2>
+    <p>Paste a pre-filled link to extract fields and values for editing.</p>
+    
+    <label for="deconstructFormUrl">Pre-filled URL:</label>
+    <input type="text" id="deconstructFormUrl" placeholder="Enter pre-filled URL here">
+
+    <table id="deconstructFieldsTable">
+        <thead>
+            <tr>
+                <th>Field ID</th>
+                <th>Pre-fill Value</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="deconstructTableBody">
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <button onclick="deconstructUrl()">Deconstruct URL</button>
+    <button onclick="reconstructUrl()">Reconstruct URL</button>
+
+    <div id="deconstructOutput" class="output"></div>
+</div>
 
 <script>
-let currentMode = 'construct';
-
 function switchMode(mode) {
-    currentMode = mode;
-    document.getElementById("instructionText").innerHTML = mode === 'construct'
-        ? "Construct Mode: Enter form URL and field values to create a pre-filled link."
-        : "Deconstruct Mode: Paste a pre-filled link to extract fields and values for editing.";
-
-    clearFields();
-    document.getElementById("actionButton").textContent = mode === 'construct' ? "Generate URL" : "Deconstruct URL";
+    // Hide all mode contents
+    document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
+    
+    // Show selected mode content
+    document.getElementById(mode + 'Mode').classList.add('active');
+    
+    // Clear outputs
+    document.querySelectorAll('.output').forEach(el => el.innerHTML = '');
 }
 
-function addField() {
-    const tableBody = document.getElementById("tableBody");
+function addConstructField() {
+    addFieldToTable('constructTableBody');
+}
 
+function addFieldToTable(tableId) {
+    const tableBody = document.getElementById(tableId);
     const row = document.createElement("tr");
     row.className = "field-row";
 
@@ -196,24 +237,10 @@ function addField() {
     tableBody.appendChild(row);
 }
 
-function clearFields() {
-    document.getElementById("formUrl").value = "";
-    document.getElementById("tableBody").innerHTML = "";
-    document.getElementById("output").innerHTML = "";
-}
-
-function processAction() {
-    if (currentMode === 'construct') {
-        generateUrl();
-    } else {
-        deconstructUrl();
-    }
-}
-
 function generateUrl() {
-    const formUrl = document.getElementById("formUrl").value;
-    const fieldIds = document.querySelectorAll(".fieldId");
-    const preFillValues = document.querySelectorAll(".preFillValue");
+    const formUrl = document.getElementById("constructFormUrl").value;
+    const fieldIds = document.querySelectorAll("#constructTableBody .fieldId");
+    const preFillValues = document.querySelectorAll("#constructTableBody .preFillValue");
 
     let queryParams = [];
 
@@ -226,21 +253,23 @@ function generateUrl() {
         }
     }
 
-    const finalUrl = `${formUrl}?${queryParams.join("&")}`;
-    document.getElementById("output").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank">${finalUrl}</a>`;
+    // Check if the URL already contains parameters
+    const connector = formUrl.includes('?') ? '&' : '?';
+    const finalUrl = `${formUrl}${connector}${queryParams.join("&")}`;
+    document.getElementById("constructOutput").innerHTML = `Generated URL: <a href="${finalUrl}" target="_blank">${finalUrl}</a>`;
 }
 
 function deconstructUrl() {
-    const url = document.getElementById("formUrl").value;
-    const [baseUrl, query] = url.split("?");
+    const url = document.getElementById("deconstructFormUrl").value;
+    const [baseUrl, query] = url.split(/\?(.+)/);
 
     if (!query) {
         alert("No pre-filled data found in the URL.");
         return;
     }
 
-    document.getElementById("formUrl").value = baseUrl;
-    document.getElementById("tableBody").innerHTML = "";
+    document.getElementById("deconstructFormUrl").value = baseUrl;
+    document.getElementById("deconstructTableBody").innerHTML = "";
 
     const params = new URLSearchParams(query);
     for (const [key, value] of params.entries()) {
@@ -251,7 +280,6 @@ function deconstructUrl() {
         fieldIdInput.type = "text";
         fieldIdInput.className = "fieldId";
         fieldIdInput.value = key;
-        fieldIdInput.disabled = true;
         fieldIdCell.appendChild(fieldIdInput);
 
         const preFillCell = document.createElement("td");
@@ -272,16 +300,37 @@ function deconstructUrl() {
         row.appendChild(preFillCell);
         row.appendChild(removeCell);
 
-        document.getElementById("tableBody").appendChild(row);
+        document.getElementById("deconstructTableBody").appendChild(row);
+    }
+}
+
+function reconstructUrl() {
+    const baseUrl = document.getElementById("deconstructFormUrl").value;
+    const fieldIds = document.querySelectorAll("#deconstructTableBody .fieldId");
+    const preFillValues = document.querySelectorAll("#deconstructTableBody .preFillValue");
+
+    let queryParams = [];
+
+    for (let i = 0; i < fieldIds.length; i++) {
+        const fieldId = fieldIds[i].value;
+        const preFillValue = preFillValues[i].value;
+
+        if (fieldId && preFillValue) {
+            queryParams.push(`${fieldId}=${encodeURIComponent(preFillValue)}`);
+        }
     }
 
-    document.getElementById("actionButton").textContent = "Reconstruct URL";
-    document.getElementById("actionButton").onclick = generateUrl;
+    const connector = baseUrl.includes('?') ? '&' : '?';
+    const finalUrl = `${baseUrl}${connector}${queryParams.join("&")}`;
+    document.getElementById("deconstructOutput").innerHTML = `Reconstructed URL: <a href="${finalUrl}" target="_blank">${finalUrl}</a>`;
 }
 
 function toggleTheme() {
     document.body.classList.toggle("night-view");
 }
+
+// Initialize with construct mode
+switchMode('construct');
 </script>
 
 </body>
